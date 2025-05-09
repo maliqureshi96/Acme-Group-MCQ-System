@@ -34,9 +34,39 @@ namespace AcmeGroup.API.Repositories
             return "MCQ Deleted";
         }
 
-        public async Task<List<MCQ>> GetAllAsync()
+        public async Task<List<MCQ>> GetAllAsync(string? filterOn = null, string? filterQuery = null, string? sortBy = null, bool isAscending = true, int pageNumber = 1, int pageSize = 1000)
         {
-            return await dbContext.MCQs.ToListAsync();
+            var mcqs = dbContext.MCQs.AsQueryable();
+
+            // Filtering
+            if (string.IsNullOrWhiteSpace(filterOn) == false && string.IsNullOrWhiteSpace(filterQuery) == false)
+            {
+                if (filterOn.Equals("Question", StringComparison.OrdinalIgnoreCase))
+                {
+                    mcqs = mcqs.Where(x => x.Question.Contains(filterQuery));
+                }
+  
+            }
+
+            // Sorting
+            if(string.IsNullOrWhiteSpace(sortBy) == false)
+            {
+                if (sortBy.Equals("McqNumber"))
+                {
+                    mcqs = isAscending ? mcqs.OrderBy(x => x.McqNumber): mcqs.OrderByDescending(x => x.McqNumber);
+                }
+                else if (sortBy.Equals("Question", StringComparison.OrdinalIgnoreCase))
+                {
+                    mcqs = isAscending ? mcqs.OrderBy(x => x.Question) : mcqs.OrderByDescending(x => x.Question);
+                }
+            }
+
+            // Pagination
+            var skipResults = (pageNumber - 1) * pageSize;
+
+
+
+            return await mcqs.Skip(skipResults).Take(pageSize).ToListAsync();
         }
 
         public async Task<MCQ?> GetByIdAsync(Guid id)

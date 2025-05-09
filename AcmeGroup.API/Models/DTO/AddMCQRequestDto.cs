@@ -5,9 +5,9 @@ namespace AcmeGroup.API.Models.DTO
     public class AddMCQRequestDto
     {
         [Required]
-        [MinLength(1, ErrorMessage ="MCQ Numebr must be a number")]
-
+        [Range(1, int.MaxValue, ErrorMessage = "MCQ Number must be a positive number")]
         public int McqNumber { get; set; }
+
 
         [Required]
         public string Question { get; set; }
